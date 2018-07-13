@@ -10,5 +10,4 @@ Open Connection and Log In
 
 Reboot RTE
     [Documentation]    Reboots Remote Testing Environment.
-    ${cmd}=    Set Variable    reboot
-    SSHLibrary.Start Command    ${cmd}
+    SSHLibrary.Start Command    reboot
