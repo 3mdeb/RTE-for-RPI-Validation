@@ -1,21 +1,38 @@
 *** Settings ***
 Library     SSHLibrary    timeout=30 seconds
+Library     Telnet        timeout=60 seconds
 
 Resource    variables.robot
 Resource    keywords.robot
 
-Test Setup       Open Connection and Log In    ${rte_ip}
-Test Teardown    SSHLibrary.Close All Connections
+Suite Setup       Open Connection and Log In    ${rte_ip}    RTE
+Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
 
-1. Test SSH after reboot
-    Enable SSH Logging    ${log_file}
+#1. Test SSH after coldboot
+#    : FOR    ${reboot}    IN RANGE    0    ${repeat}
+#    \    #Open Connection and Log In    ${rte_ip}    RTE
+#    \    Coldboot DUT
+#    \    Sleep    ${sleep} seconds
+#    \    Open Connection and Log In    ${dut_ip}    DUT
+#    \    ${ssh_info}=    SSHLibrary.Get Connection
+#    \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
+#    \    #SSHLibrary.Close connection # zamyka wszystkie SSH, a nie powinno
+#    \    ${reboot} =    Set Variable    ${reboot + 1}
+
+2. Test SSH after warmboot
+    Coldboot DUT
+    Sleep    ${sleep} seconds
+    Serial setup    ${dut_ip}
+    Serial Login DUT    ${dut_user}    ${dut_pwd}
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
-    \    Reboot RTE
-    \    SSHLibrary.Close Connection
-    \    Sleep    ${sleep} seconds
-    \    Open Connection and Log In    ${rte_ip}
-    \    ${ssh_info}=    Get Connection
-    \    Should Be Equal As Strings    ${ssh_info.host}    ${rte_ip}
+    \    Warmboot DUT
+    \    #Sleep    ${sleep} seconds
+    \    Serial setup    ${dut_ip}
+    \    Serial Login DUT    ${dut_user}    ${dut_pwd}
+    \    Open Connection and Log In    ${dut_ip}
+    \    ${ssh_info}=    SSHLibrary.Get Connection
+    \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
+    \    SSHLibrary.Close connection
     \    ${reboot} =    Set Variable    ${reboot + 1}
