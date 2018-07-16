@@ -10,16 +10,16 @@ Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
 
-#1. Test SSH after coldboot
-#    : FOR    ${reboot}    IN RANGE    0    ${repeat}
-#    \    #Open Connection and Log In    ${rte_ip}    RTE
-#    \    Coldboot DUT
-#    \    Sleep    ${sleep} seconds
-#    \    Open Connection and Log In    ${dut_ip}    DUT
-#    \    ${ssh_info}=    SSHLibrary.Get Connection
-#    \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
-#    \    #SSHLibrary.Close connection # zamyka wszystkie SSH, a nie powinno
-#    \    ${reboot} =    Set Variable    ${reboot + 1}
+1. Test SSH after coldboot
+    : FOR    ${reboot}    IN RANGE    0    ${repeat}
+    \    Coldboot DUT
+    \    Sleep    ${sleep} seconds
+    \    Open Connection and Log In    ${dut_ip}    DUT
+    \    ${ssh_info}=    SSHLibrary.Get Connection
+    \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
+    \    ## closes all SSH connections [bug?]
+    \    #SSHLibrary.Close connection
+    \    ${reboot} =    Set Variable    ${reboot + 1}
 
 2. Test SSH after warmboot
     Coldboot DUT
