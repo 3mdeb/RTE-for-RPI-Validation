@@ -1,6 +1,6 @@
 *** Settings ***
 Library     SSHLibrary    timeout=30 seconds
-Library     Telnet        timeout=60 seconds
+Library     Telnet        timeout=30 seconds
 
 Resource    variables.robot
 Resource    keywords.robot
@@ -17,13 +17,11 @@ Suite Teardown    Log Out And Close Connection
     \    Open Connection and Log In    ${dut_ip}    DUT
     \    ${ssh_info}=    SSHLibrary.Get Connection
     \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
-    \    ## closes all SSH connections [bug?]
-    \    #SSHLibrary.Close connection
+    \    SSHLibrary.Close connection
+    \    SSHLibrary.Switch Connection    RTE
     \    ${reboot} =    Set Variable    ${reboot + 1}
 
 2. Test SSH after warmboot
-    Coldboot DUT
-    Sleep    ${sleep} seconds
     Serial setup    ${dut_ip}
     Serial Login DUT    ${dut_user}    ${dut_pwd}
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
