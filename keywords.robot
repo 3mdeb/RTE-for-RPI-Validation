@@ -34,7 +34,7 @@ Serial Login DUT
 Hard Reboot DUT
     [Documentation]    Hard reboot Device Under Test.
     ${result}=    RteCtrl Relay
-    sleep    1 seconds
+    Sleep    1 seconds
     Run Keyword If   ${result}==0  RteCtrl Relay
 
 Soft Reboot DUT
