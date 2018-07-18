@@ -1,7 +1,9 @@
 *** Settings ***
 Library     SSHLibrary    timeout=30 seconds
 Library     Telnet        timeout=30 seconds
+Library     RequestsLibrary
 
+Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
 Resource    keywords.robot
 
@@ -12,7 +14,7 @@ Suite Teardown    Log Out And Close Connection
 
 1. Test SSH after coldboot
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
-    \    Coldboot DUT
+    \    Hard Reboot DUT
     \    Sleep    ${sleep} seconds
     \    Open Connection and Log In    ${dut_ip}    DUT
     \    ${ssh_info}=    SSHLibrary.Get Connection
@@ -25,7 +27,7 @@ Suite Teardown    Log Out And Close Connection
     Serial setup    ${dut_ip}
     Serial Login DUT    ${dut_user}    ${dut_pwd}
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
-    \    Warmboot DUT
+    \    Soft Reboot DUT
     \    #Sleep    ${sleep} seconds
     \    Serial setup    ${dut_ip}
     \    Serial Login DUT    ${dut_user}    ${dut_pwd}
