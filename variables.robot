@@ -2,6 +2,7 @@
 
 ${USERNAME}        root
 ${PASSWORD}        meta-rte
+${http_port}       8000
 ${s2n_port}        13542     ##/dev/ttyUSB0
 ${dut_user}        root
 ${dut_pwd}         meta-rte
