@@ -7,5 +7,6 @@ virtualenv .
 source ./bin/activate
 
 pip install robotframework-sshlibrary
+pip install robotframework-requests
 
 deactivate
