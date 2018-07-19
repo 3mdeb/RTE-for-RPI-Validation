@@ -13,23 +13,17 @@ Log Out And Close Connection
     SSHLibrary.Close All Connections
     Telnet.Close All Connections
 
-Serial Setup
-    [Documentation]    Setup telnet connection. Pass host address where serial
-    ...                is redirected as arguments.
+Serial Connection and Log In
+    [Documentation]    Setup telnet connection and log in to system. Pass host
+    ...                ip as an argument.
     [Arguments]    ${host}
     Telnet.Open Connection    ${host}    port=${s2n_port}
-    # remove encoding setup for terminal emulator pyte
     Telnet.Set Encoding    errors=ignore
-    Set Timeout    15
-
-Serial Login DUT
-    [Documentation]    Login to system via serial. Pass username and password as
-    ...                an argument.
-    [Arguments]    ${username}    ${password}
-    Telnet.Set Timeout    30
+    Telnet.Set Timeout    60
     Telnet.Set Prompt    \~#
-    Telnet.Login    ${username}    ${password}
-    Telnet.Read Until Prompt
+    Telnet.Write    \n
+    Telnet.Login    ${dut_user}    ${dut_pwd}
+    #Telnet.Read Until Prompt
 
 Hard Reboot DUT
     [Documentation]    Hard reboot Device Under Test.
@@ -39,4 +33,5 @@ Hard Reboot DUT
 
 Soft Reboot DUT
     [Documentation]    Soft reboot Device Under Test.
-    Telnet.Execute Command    reboot\n
+    Telnet.Write   reboot\n
+    Telnet.Close Connection
