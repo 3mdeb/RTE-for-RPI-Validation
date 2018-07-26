@@ -23,7 +23,6 @@ Serial Connection and Log In
     Telnet.Set Prompt    \~#
     Telnet.Write    \n
     Telnet.Login    ${dut_user}    ${dut_pwd}
-    #Telnet.Read Until Prompt
 
 Hard Reboot DUT
     [Documentation]    Hard reboot Device Under Test.
@@ -35,3 +34,18 @@ Soft Reboot DUT
     [Documentation]    Soft reboot Device Under Test.
     Telnet.Write   reboot\n
     Telnet.Close Connection
+
+USB Storage Detection
+    [Documentation]    Check USB storage correct detection. Pass device name as
+    ...                an argument. Returns result as an output.
+    [Arguments]    ${sdx}
+    Telnet.Write    ls ${sdx}
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
+
+Get USB Device
+    [Documentation]    Returns information about USB device on specific port.
+    [Arguments]    ${bus_num}
+    Telnet.Write    lsusb | grep -v 'Device 001' | grep '${bus_num}'
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
