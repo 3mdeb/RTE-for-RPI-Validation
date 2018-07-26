@@ -43,3 +43,15 @@ USB 2.2 USB port 2 (J8) validation
     ${result}=    USB storage detection    /dev/sdb
     Should Not Contain    ${result}    No such file or directory
     ${info}=    Get USB Device    ${usb2}
+
+RS232 3.1 communication to DUT validation
+    ${msg}=    Set Variable    Test #1 RS232
+    Start Listening On Serial Port    DUT    ${rs232}
+    Send Serial Msg    RTE    ${rs232}    ${msg}
+    ${result}=    Telnet.Read Until    ${msg}
+
+RS232 3.2 communication from DUT validation
+    ${msg}=    Set Variable    Test #2 RS232
+    Start Listening On Serial Port    RTE    ${rs232}
+    Send Serial Msg    DUT    ${rs232}    ${msg}
+    ${result}=    SSHLibrary.Read Until    ${msg}
