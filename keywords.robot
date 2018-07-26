@@ -50,3 +50,21 @@ Get USB Device
     Telnet.Write Bare    lsusb | grep -v 'Device 001' | grep '${bus_num}'\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
+
+Start Listening On Serial Port
+    [Documentation]    Start listening on specified port.
+    ...                Pass device and device's port as an argument.
+    [Arguments]    ${device}    ${port}
+    Should Contain Any    ${device}    RTE    DUT
+    Run Keyword If    '${device}'=='RTE'    SSHLibrary.Write    head -n 1 < ${port}
+    ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    head -n 1 < ${port}
+    ...    ELSE    Log    'device' argument should contain RTE or DUT
+
+Send Serial Msg
+    [Documentation]    Send serial iface message via specified port. Pass
+    ...                device, device's port and text to send as an arguments.
+    [Arguments]    ${device}    ${port}    ${msg}
+    Should Contain Any    ${device}    RTE    DUT
+    Run Keyword If    '${device}'=='RTE'    SSHLibrary.Write    sleep 1 && echo -e "${msg}" > ${port}
+    ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    sleep 1 && echo -e "${msg}" > ${port}
+    ...    ELSE    Log    'device' argument should contain RTE or DUT
