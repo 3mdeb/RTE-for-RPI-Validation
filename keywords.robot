@@ -10,8 +10,9 @@ Open Connection and Log In
     REST API Setup    RteCtrl
 
 Log Out And Close Connection
-    SSHLibrary.Close All Connections
+    Telnet.Write    logout
     Telnet.Close All Connections
+    SSHLibrary.Close All Connections
 
 Serial Connection and Log In
     [Documentation]    Setup telnet connection and log in to system. Pass host
@@ -19,7 +20,7 @@ Serial Connection and Log In
     [Arguments]    ${host}
     Telnet.Open Connection    ${host}    port=${s2n_port}
     Telnet.Set Encoding    errors=ignore
-    Telnet.Set Timeout    60
+    Telnet.Set Timeout    120
     Telnet.Set Prompt    \~#
     Telnet.Write    \n
     Telnet.Login    ${dut_user}    ${dut_pwd}
@@ -39,13 +40,13 @@ USB Storage Detection
     [Documentation]    Check USB storage correct detection. Pass device name as
     ...                an argument. Returns result as an output.
     [Arguments]    ${sdx}
-    Telnet.Write    ls ${sdx}
+    Telnet.Write Bare   ls ${sdx}\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
 
 Get USB Device
     [Documentation]    Returns information about USB device on specific port.
     [Arguments]    ${bus_num}
-    Telnet.Write    lsusb | grep -v 'Device 001' | grep '${bus_num}'
+    Telnet.Write Bare    lsusb | grep -v 'Device 001' | grep '${bus_num}'\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
