@@ -12,5 +12,5 @@ ${repeat}          20
 ${sleep}           20
 
 # usb variables
-${usb1}            Device 004
-${usb2}            Device 005
+${usb1}            Bus 004
+${usb2}            Bus 005
