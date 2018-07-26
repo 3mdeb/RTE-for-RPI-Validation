@@ -14,3 +14,6 @@ ${sleep}           20
 # usb variables
 ${usb1}            Bus 004
 ${usb2}            Bus 005
+
+# serial variables
+${rs232}           /dev/ttyS1
