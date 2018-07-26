@@ -37,9 +37,9 @@ SSH 1.2 Test SSH after warmboot
 USB 2.1 USB port 1 (J6) validation
     ${result}=    USB storage detection    /dev/sda
     Should Not Contain    ${result}    No such file or directory
-    Log    Port 1 (J6):    Get USB Device    ${usb1}
+    ${info}=    Get USB Device    ${usb1}
 
 USB 2.2 USB port 2 (J8) validation
     ${result}=    USB storage detection    /dev/sdb
     Should Not Contain    ${result}    No such file or directory
-    Log    Port 2 (J8):    Get USB Device    ${usb2}
+    ${info}=    Get USB Device    ${usb2}
