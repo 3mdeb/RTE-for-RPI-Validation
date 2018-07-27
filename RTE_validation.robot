@@ -13,10 +13,11 @@ Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
 SSH 1.1 Test SSH after coldboot
+    Telnet.Close Connection
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Hard Reboot DUT
     \    Sleep    ${sleep} seconds
-    \    Open Connection and Log In    ${dut_ip}    DUT
+    \    SSH Connection and Log In    ${dut_ip}    DUT
     \    ${ssh_info}=    SSHLibrary.Get Connection
     \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
     \    SSHLibrary.Close connection
@@ -28,7 +29,7 @@ SSH 1.2 Test SSH after warmboot
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
     \    Serial Connection and Log In    ${rte_ip}
-    \    Open Connection and Log In    ${dut_ip}    DUT
+    \    SSH Connection and Log In    ${dut_ip}    DUT
     \    ${ssh_info}=    SSHLibrary.Get Connection
     \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
     \    SSHLibrary.Close connection
