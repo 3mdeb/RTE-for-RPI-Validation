@@ -2,6 +2,7 @@
 Library     SSHLibrary    timeout=30 seconds
 Library     Telnet        timeout=30 seconds
 Library     RequestsLibrary
+Library     Collections
 
 Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
@@ -32,7 +33,7 @@ SSH 1.2 Test SSH after warmboot
     \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
     \    SSHLibrary.Close connection
     \    SSHLibrary.Switch Connection    RTE
-    \    ${reboot} =    Set Variable    ${reboot + 1}
+    \    ${reboot}=    Set Variable    ${reboot + 1}
 
 USB 2.1 USB port 1 (J6) validation
     ${result}=    USB storage detection    /dev/sda
@@ -55,3 +56,17 @@ RS232 3.2 communication from DUT validation
     Start Listening On Serial Port    RTE    ${rs232}
     Send Serial Msg    DUT    ${rs232}    ${msg}
     ${result}=    SSHLibrary.Read Until    ${msg}
+
+GPIO 4.1 Loopback validation
+    GPIO Set All Directions    RTE    in
+    GPIO Set All Directions    DUT    out
+    :FOR    ${index}    IN RANGE    0    2
+    \    GPIO Set All Values    DUT    1
+    \    Sleep    1 seconds
+    \    @{gpio_values}=    GPIO Get All Values    RTE
+    \    Collections.List Should Not Contain Value    ${gpio_values}    0
+    \    GPIO Set All Values    DUT    0
+    \    Sleep    1 seconds
+    \    @{gpio_values}=    GPIO Get All Values    RTE
+    \    Collections.List Should Not Contain Value    ${gpio_values}    1
+    \    ${index}=    Set Variable    ${index + 1}
