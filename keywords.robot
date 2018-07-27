@@ -58,7 +58,7 @@ Start Listening On Serial Port
     Should Contain Any    ${device}    RTE    DUT
     Run Keyword If    '${device}'=='RTE'    SSHLibrary.Write    head -n 1 < ${port}
     ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    head -n 1 < ${port}
-    ...    ELSE    Log    'device' argument should contain RTE or DUT
+    ...    ELSE    Fail    'device' argument should contain RTE or DUT
 
 Send Serial Msg
     [Documentation]    Send serial iface message via specified port. Pass
@@ -67,4 +67,63 @@ Send Serial Msg
     Should Contain Any    ${device}    RTE    DUT
     Run Keyword If    '${device}'=='RTE'    SSHLibrary.Write    sleep 1 && echo -e "${msg}" > ${port}
     ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    sleep 1 && echo -e "${msg}" > ${port}
-    ...    ELSE    Log    'device' argument should contain RTE or DUT
+    ...    ELSE    Fail    'device' argument should contain RTE or DUT
+
+GPIO Set Direction
+    [Documentation]    Sets device's GPIO direction. Pass device, gpio number
+    ...                 and direction as an argument.
+    [Arguments]    ${device}    ${gpio}    ${direction}
+    Should Contain Any    ${device}    RTE    DUT
+    Run Keyword If    '${device}'=='RTE'
+    ...    SSHLibrary.Write    echo ${direction} > /sys/class/gpio/${gpio}/direction
+    ...    ELSE IF    '${device}'=='DUT'
+    ...    Telnet.Write    echo ${direction} > /sys/class/gpio/${gpio}/direction
+    ...    ELSE    Fail    'device' argument should contain RTE or DUT
+
+GPIO Set All Directions
+    [Documentation]    Set directions for all tested GPIOs. Pass device for
+    ...                configuration and GPIOs direction as an argument.
+    [Arguments]    ${device}    ${direction}
+    :FOR    ${gpio}    IN    @{gpio_list}
+    \    GPIO Set Direction    ${device}    ${gpio}    ${direction}
+
+GPIO Set Value
+    [Documentation]    Sets device's GPIO value. Pass device, gpio number
+    ...                 and value as an argument.
+    [Arguments]    ${device}    ${gpio}    ${value}
+    Should Contain Any    ${device}    RTE    DUT
+    Run Keyword If    '${device}'=='RTE'
+    ...    SSHLibrary.Write    echo ${value} > /sys/class/gpio/${gpio}/value
+    ...    ELSE IF    '${device}'=='DUT'
+    ...    Telnet.Write    echo ${value} > /sys/class/gpio/${gpio}/value
+    ...    ELSE    Fail    'device' argument should contain RTE or DUT
+
+GPIO Set All Values
+    [Documentation]    Set values for all tested GPIOs. Pass device for
+    ...                configuration and GPIOs value as an argument.
+    [Arguments]    ${device}    ${value}
+    :FOR    ${gpio}    IN    @{gpio_list}
+    \    GPIO Set Value    ${device}    ${gpio}    ${value}
+
+GPIO Get Value
+    [Documentation]    Keyword returns GPIO value. Pass device and gpio as an
+    ...                argument.
+    [Arguments]    ${device}    ${gpio}
+    Should Contain Any    ${device}    RTE    DUT
+    ${out}=    Run Keyword If    '${device}'=='RTE'
+    ...    SSHLibrary.Execute Command    cat /sys/class/gpio/${gpio}/value
+    ...    ELSE IF    '${device}'=='DUT'
+    ...    Telnet.Write    cat /sys/class/gpio/${gpio}/value
+    ...    Telnet.Read Until Regex    [0-1]
+    ...    ELSE    Fail    'device' argument should contain RTE or DUT
+    [Return]    ${out}
+
+GPIO Get All Values
+    [Documentation]    Read values from all tested GPIOs and return list of
+    ...                values. Pass device as an argument.
+    [Arguments]    ${device}
+    ${value_list}=    Create List
+    :FOR    ${gpio}    IN    @{gpio_list}
+    \    ${value}=    GPIO Get Value    ${device}    ${gpio}
+    \    Collections.Append To List    ${value_list}    ${value}
+    [Return]    @{value_list}
