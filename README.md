@@ -45,3 +45,14 @@ SSH service test cases):
   with NULL modem RS232 cable),
 * `-t GPIO` - GPIO loopback validation (connect 4 pins on J10 header to
   corresponding 4 GPIO pins on DUT J10 header).
+
+#### Additional information
+
+If there is a problem with telnet / ser2net connection, check the content of
+`/etc/ser2net.conf`. Port declarations are specified at the end of the file. It
+should look like this:
+
+```
+13541:telnet:600:/dev/ttyS1:115200 8DATABITS NONE 1STOPBIT
+13542:telnet:600:/dev/ttyUSB0:115200 8DATABITS NONE 1STOPBIT
+```
