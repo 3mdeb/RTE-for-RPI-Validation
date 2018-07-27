@@ -4,15 +4,22 @@ Open Connection and Log In
     [Documentation]    Open SSH connection with ip passed as argument and log
     ...                in to system.
     [Arguments]    ${ip}    ${alias}
-    SSHLibrary.Set Default Configuration    timeout=60 seconds
-    SSHLibrary.Open Connection    ${ip}    alias=${alias}
-    SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
-    REST API Setup    RteCtrl
+    SSH Connection and Log In    ${ip}    ${alias}
+    Serial Connection and Log In    ${ip}
 
 Log Out And Close Connection
     Telnet.Write    logout
     Telnet.Close All Connections
     SSHLibrary.Close All Connections
+
+SSH Connection and Log In
+    [Documentation]    Open SSH connection with ip passed as argument and log
+    ...                in to system.
+    [Arguments]    ${ip}    ${alias}
+    SSHLibrary.Set Default Configuration    timeout=60 seconds
+    SSHLibrary.Open Connection    ${ip}    alias=${alias}
+    SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
+    REST API Setup    RteCtrl
 
 Serial Connection and Log In
     [Documentation]    Setup telnet connection and log in to system. Pass host
