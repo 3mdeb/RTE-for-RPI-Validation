@@ -9,7 +9,6 @@ ${dut_pwd}         meta-rte
 
 # ssh variables
 ${repeat}          20
-${sleep}           20
 
 # usb variables
 ${usb1}            Bus 004
