@@ -3,6 +3,7 @@ Library     SSHLibrary    timeout=30 seconds
 Library     Telnet        timeout=30 seconds
 Library     RequestsLibrary
 Library     Collections
+Library     String
 
 Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
@@ -58,7 +59,7 @@ RS232 3.2 communication from DUT validation
     Send Serial Msg    DUT    ${rs232}    ${msg}
     ${result}=    SSHLibrary.Read Until    ${msg}
 
-GPIO 4.1 Loopback validation
+GPIO 4.1 Loopback validation RTE IN / DUT OUT
     GPIO Set All Directions    RTE    in
     GPIO Set All Directions    DUT    out
     :FOR    ${index}    IN RANGE    0    2
@@ -69,5 +70,19 @@ GPIO 4.1 Loopback validation
     \    GPIO Set All Values    DUT    0
     \    Sleep    1 seconds
     \    @{gpio_values}=    GPIO Get All Values    RTE
+    \    Collections.List Should Not Contain Value    ${gpio_values}    1
+    \    ${index}=    Set Variable    ${index + 1}
+
+GPIO 4.2 Loopback validation RTE OUT / DUT IN
+    GPIO Set All Directions    DUT    in
+    GPIO Set All Directions    RTE    out
+    :FOR    ${index}    IN RANGE    0    1
+    \    GPIO Set All Values    RTE    1
+    \    Sleep    1 seconds
+    \    @{gpio_values}=    GPIO Get All Values    DUT
+    \    Collections.List Should Not Contain Value    ${gpio_values}    0
+    \    GPIO Set All Values    RTE    0
+    \    Sleep    1 seconds
+    \    @{gpio_values}=    GPIO Get All Values    DUT
     \    Collections.List Should Not Contain Value    ${gpio_values}    1
     \    ${index}=    Set Variable    ${index + 1}
