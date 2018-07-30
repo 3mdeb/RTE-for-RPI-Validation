@@ -26,7 +26,7 @@ SSH 1.1 Test SSH after coldboot
 SSH 1.2 Test SSH after warmboot
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
-    \    Serial Connection and Log In    ${rte_ip}
+    \    Telnet.Login    ${dut_user}    ${dut_pwd}
     \    SSH Connection and Log In    ${dut_ip}    DUT
     \    ${ssh_info}=    SSHLibrary.Get Connection
     \    Should Be Equal As Strings    ${ssh_info.host}    ${dut_ip}
@@ -45,12 +45,14 @@ USB 2.2 USB port 2 (J8) validation
 
 RS232 3.1 communication to DUT validation
     ${msg}=    Set Variable    Test #1 RS232
+    Telnet.Set Timeout    5 seconds
     Start Listening On Serial Port    DUT    ${rs232}
     Send Serial Msg    RTE    ${rs232}    ${msg}
     ${result}=    Telnet.Read Until    ${msg}
 
 RS232 3.2 communication from DUT validation
     ${msg}=    Set Variable    Test #2 RS232
+    Telnet.Set Timeout    5 seconds
     Start Listening On Serial Port    RTE    ${rs232}
     Send Serial Msg    DUT    ${rs232}    ${msg}
     ${result}=    SSHLibrary.Read Until    ${msg}
