@@ -41,7 +41,7 @@ Hard Reboot DUT
 Soft Reboot DUT
     [Documentation]    Soft reboot Device Under Test.
     Telnet.Write   reboot\n
-    Telnet.Close Connection
+    #Telnet.Close Connection
 
 USB Storage Detection
     [Documentation]    Check USB storage correct detection. Pass device name as
@@ -140,3 +140,41 @@ GPIO Get All Values
     \    ${value}=    GPIO Get Value    ${device}    ${gpio}
     \    Collections.Append To List    ${value_list}    ${value}
     [Return]    @{value_list}
+
+Get RuntimeWatchdogSec
+    [Documentation]    Get RuntimeWatchdogSec value from /etc/systemd/system.conf.
+    ${tmp}=    Telnet.Execute Command    cat /etc/systemd/system.conf | grep RuntimeWatchdog
+    ${tmp}=    String.Remove String    ${tmp}     RuntimeWatchdogSec=    \r\nroot@orange-pi-zero:~#
+    ${out}=    Run Keyword If    '${tmp[0]}'=='#'    String.Get Substring    ${tmp}    1
+    ...        ELSE    Set Variable    ${tmp}
+    [Return]    ${out}
+
+Set RuntimeWatchdogSec
+    [Documentation]    Configure the hardware watchdog's timeout for tests.
+    Telnet.Write    sed -i '/RuntimeWatchdogSec=${old_runtime}/c\RuntimeWatchdogSec=${new_runtime}' /etc/systemd/system.conf
+
+Rollback RuntimeWatchdogSec
+    [Documentation]    Rollback the changes on the hardware watchdog's timeout.
+    Telnet.Write    sed -i '/RuntimeWatchdogSec=${new_runtime}/c\RuntimeWatchdogSec=${old_runtime}' /etc/systemd/system.conf
+
+Cbfstool Get Contents
+    [Documentation]    Returns printed contents of the ROM specified by an
+    ...                argument.
+    [Arguments]    ${file}
+    Telnet.Write Bare    cbfstool ${file} print\n
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
+
+Ifdtool Get Version
+    [Documentation]    Returns Ifdtool's version.
+    Telnet.Write Bare    ifdtool --version\n
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
+
+Ifdtool Dump Descriptor
+    [Documentation]    Returns dumped Intel firmware descriptor. Pass rom file
+    ...                path as an argument.
+    [Arguments]    ${file}
+    Telnet.Write Bare    ifdtool -d ${file}\n
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
