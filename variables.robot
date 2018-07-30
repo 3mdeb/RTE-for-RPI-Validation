@@ -23,3 +23,11 @@ ${gpio2}           gpio401
 ${gpio3}           gpio402
 ${gpio4}           gpio403
 @{gpio_list}    ${gpio1}    ${gpio2}    ${gpio3}    ${gpio4}
+
+# Yocto regression
+${new_runtime}     5
+${old_runtime}     0
+${err1}            Kernel panic
+${err2}            Sending NMI from CPU
+${err3}            Unable to handle kernel NULL pointer dereference
+@{error_list}    ${err1}    ${err2}    ${err3}
