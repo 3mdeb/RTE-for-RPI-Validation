@@ -112,6 +112,14 @@ GPIO Set All Values
     :FOR    ${gpio}    IN    @{gpio_list}
     \    GPIO Set Value    ${device}    ${gpio}    ${value}
 
+GPIO Telnet Read
+    [Documentation]    Keyword for GPIO Get Value (due to the complexity).
+    [Arguments]    ${gpio}
+    Telnet.Write Bare    cat /sys/class/gpio/${gpio}/value\n
+    ${out}=    Telnet.Read Until Regexp    \n[0-1]
+    ${val}=    String.Get Substring    ${out}    -1
+    [Return]    ${val}
+
 GPIO Get Value
     [Documentation]    Keyword returns GPIO value. Pass device and gpio as an
     ...                argument.
@@ -119,9 +127,7 @@ GPIO Get Value
     Should Contain Any    ${device}    RTE    DUT
     ${out}=    Run Keyword If    '${device}'=='RTE'
     ...    SSHLibrary.Execute Command    cat /sys/class/gpio/${gpio}/value
-    ...    ELSE IF    '${device}'=='DUT'
-    ...    Telnet.Write    cat /sys/class/gpio/${gpio}/value
-    ...    Telnet.Read Until Regex    [0-1]
+    ...    ELSE IF    '${device}'=='DUT'    GPIO Telnet Read    ${gpio}
     ...    ELSE    Fail    'device' argument should contain RTE or DUT
     [Return]    ${out}
 
