@@ -25,6 +25,7 @@ ${gpio4}           gpio403
 @{gpio_list}    ${gpio1}    ${gpio2}    ${gpio3}    ${gpio4}
 
 # Yocto regression
+${fw_path}        /tmp/firmware
 ${new_runtime}     5
 ${old_runtime}     0
 ${err1}            Kernel panic
