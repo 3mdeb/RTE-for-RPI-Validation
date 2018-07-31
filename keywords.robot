@@ -45,6 +45,12 @@ Soft Reboot DUT
     Telnet.Write   reboot\n
     #Telnet.Close Connection
 
+Reboot and Reconnect
+    [Documentation]    Restarts DUT and set Telnet connection for next test.
+    ...                Use this keyword in test teardown if timeout occurs.
+    Hard Reboot DUT
+    Telnet.Login    ${dut_user}    ${dut_pwd}
+
 USB Storage Detection
     [Documentation]    Check USB storage correct detection. Pass device name as
     ...                an argument. Returns result as an output.
@@ -163,7 +169,10 @@ Cbfstool Get Contents
     [Documentation]    Returns printed contents of the ROM specified by an
     ...                argument.
     [Arguments]    ${file}
-    Telnet.Write Bare    cbfstool ${file} print\n
+    #TODO: SSHLibrary.Put File    ${file}    ${fw_path}
+    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:${fw_path}
+    Should Be Empty    ${result}
+    Telnet.Write Bare    cbfstool ${fw_path} print\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
 
@@ -177,6 +186,9 @@ Ifdtool Dump Descriptor
     [Documentation]    Returns dumped Intel firmware descriptor. Pass rom file
     ...                path as an argument.
     [Arguments]    ${file}
-    Telnet.Write Bare    ifdtool -d ${file}\n
+    #TODO: SSHLibrary.Put File    ${file}    ${fw_path}
+    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:${fw_path}
+    Should Be Empty    ${result}
+    Telnet.Write Bare    ifdtool -d ${fw_path}\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
