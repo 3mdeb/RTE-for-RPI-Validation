@@ -30,15 +30,16 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
     Should Not Contain    ${out}    No such file or directory
     Telnet.Write    echo 1 > /dev/watchdog
     ${out}=    Telnet.Read Until   watchdog did not stop!
-    Telnet.Login    ${dut_user}    ${dut_pwd}
+    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
+    Should Contain    ${out}    Starting kernel
 
 2.2 Watchdog fork-bomb
     ${old_runtime}=    Get RuntimeWatchdogSec
     Run Keyword If    '${old_runtime}'!='${new_runtime}'    Set RuntimeWatchdogSec
-    # execute fork-bomb
-    #Telnet.Write    bomb() { bomb | bomb & }; bomb
+    Telnet.Write    bomb() { bomb | bomb & }; bomb
     # test if WDT performed reboot:
-    #Telnet.Login    ${dut_user}    ${dut_pwd}
+    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
+    Should Contain    ${out}    Starting kernel
 
 3.1 cbfstool dump ROM content
     ${result}=    Cbfstool Get Contents    ${fw_file}
