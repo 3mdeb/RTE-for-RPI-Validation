@@ -37,9 +37,17 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
 
-2.2 Watchdog fork-bomb
+2.2 Watchdog fork-bomb - fixed WDT
     [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
     ${old_runtime}=    Get RuntimeWatchdogSec
+    # start fork-bomb
+    Telnet.Write    bomb() { bomb | bomb & }; bomb
+    # test if WDT performed reboot:
+    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
+    Should Contain    ${out}    Starting kernel
+
+2.3 Watchdog fork-bomb - custom WDT
+    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
     Run Keyword If    '${old_runtime}'!='${new_runtime}'    Set RuntimeWatchdogSec
     # reexecute daemon
     Telnet.Write    systemctl daemon-reexec
