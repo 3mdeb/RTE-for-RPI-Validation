@@ -22,8 +22,7 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
 1.2 Warmboot validation
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
-    \    Serial Connection and Log In    ${rte_ip}
-    \    ${out}=    Telnet.Read
+    \    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     \    Run Keyword And Continue On Failure    Should Not Contain Any    ${out}    @{error_list}
 
 2.1 Watchdog manual reset
