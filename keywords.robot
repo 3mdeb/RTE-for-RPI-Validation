@@ -5,6 +5,8 @@ Open Connection and Log In
     ...                in to system.
     [Arguments]    ${ip}    ${alias}
     SSH Connection and Log In    ${ip}    ${alias}
+    ${state}=    SSHLibrary.Execute Command    cat /sys/class/gpio/gpio199/value
+    Run Keyword If   '${state}'=='0'    RteCtrl Relay
     Serial Connection and Log In    ${ip}
 
 Log Out And Close Connection
