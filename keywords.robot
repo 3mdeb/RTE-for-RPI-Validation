@@ -149,6 +149,32 @@ GPIO Get All Values
     \    Collections.Append To List    ${value_list}    ${value}
     [Return]    @{value_list}
 
+I2C Get Available Busses
+    [Documentation]    Returns list of available I2C busses.
+    Telnet.Write Bare    i2cdetect -l\n
+    ${out}=    Telnet.Read Until Prompt
+    ${list}=    String.Get Regexp Matches    ${out}    i2c-[0-9a-f]
+    [Return]    ${list}
+
+I2C Get Device Addresses
+    [Documentation]    Returns addresses of available I2C devices on bus
+    ...                specified in argument.
+    [Arguments]    ${bus}
+    ${bus_num}=    String.Get Substring    ${bus}    -1
+    Telnet.Write Bare    i2cdetect -y ${bus_num}\n
+    ${out}=    Telnet.Read Until Prompt
+    [Return]    ${out}
+
+I2C Parse Device Addresses
+    [Arguments]    ${items}
+    ${list}=    Create List
+    :FOR    ${item}    IN    @{items}
+    \    Log    ${item}
+    \    ${item}=    String.Get Substring    ${item}    3
+    \    ${match}=    String.Get Regexp Matches    ${item}    [0-9a-f][0-9a-f]
+    \    Run Keyword If    ${match}   Collections.Append To List    ${list}    ${match}
+    [Return]    @{list}
+
 Get RuntimeWatchdogSec
     [Documentation]    Get RuntimeWatchdogSec value from /etc/systemd/system.conf.
     ${tmp}=    Telnet.Execute Command    cat /etc/systemd/system.conf | grep RuntimeWatchdog
