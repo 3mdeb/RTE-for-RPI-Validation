@@ -33,7 +33,9 @@ Make sure that virtualvenv with robot framework is activated. General use:
 * `-t RS232*` - RS232 communication test in both directions (connect both RTE
   with NULL modem RS232 cable),
 * `-t GPIO*` - GPIO loopback validation (connect 4 pins on J10 header to
-  corresponding 4 GPIO pins on DUT J10 header).
+  corresponding 4 GPIO pins on DUT J10 header),
+* `-t I2C*` - I2C interface validation (connect 4 pins on J9 header to
+  corresponding pins on BMA220 sensor).
 
 To run `RTE_validation.robot` test suite it's required to set `rte_ip` ,`dut_ip`
 (ip address of RTE Under Test) and `repeat` (number of reboots, default=20)
@@ -44,14 +46,14 @@ variables directly in command line, e.g.:
 To run specific tests from test suite type (e.g. interfaces validation without
 SSH service test cases):
 
-`robot -L TRACE -v rte_ip:192.168.3.105 -t USB* -t RS232* -t GPIO* RTE_validation.robot`
+`robot -L TRACE -v rte_ip:192.168.3.105 -t USB* -t RS232* -t GPIO* -t I2C* RTE_validation.robot`
 
 ### Yocto regression test suite
 
 #### Available test cases (`regression_tests.robot`):
 * `-t 1*` - system boot validation after coldboot (1.1) and warmboot (1.2),  
 * `-t 2*` - watchdog validation: manual reset via watchdog (2.1) and fork-bomb
-  test for WDT (2.2),
+  test for WDT (2.2 and 2.3),
 * `-t 3*` - CBFStool (3.1) and IFDtool (3.2) test cases.
 
 To run `regression_tests.robot` test suite it's required to set `rte_ip`,
