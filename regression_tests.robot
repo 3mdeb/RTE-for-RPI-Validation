@@ -39,8 +39,7 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
 2.2 Watchdog fork-bomb - fixed WDT
     [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     ${old_runtime}=    Get RuntimeWatchdogSec
-    # start fork-bomb
-    Telnet.Write    bomb() { bomb | bomb & }; bomb
+    Start fork-bomb
     # test if WDT performed reboot:
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
@@ -51,8 +50,7 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
     # reexecute daemon
     Telnet.Write    systemctl daemon-reexec
     Telnet.Read Until Prompt
-    # start fork-bomb
-    Telnet.Write    bomb() { bomb | bomb & }; bomb
+    Start fork-bomb
     # test if WDT performed reboot:
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
