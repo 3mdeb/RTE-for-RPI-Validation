@@ -15,30 +15,29 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
 
 *** Test Cases ***
 1.1 Coldboot validation
-    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Hard Reboot DUT
     \    ${out}=    Telnet.Read Until    login:
     \    Run Keyword And Continue On Failure    Should Not Contain Any    ${out}    @{error_list}
 
 1.2 Warmboot validation
-    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
+    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
     \    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     \    Run Keyword And Continue On Failure    Should Not Contain Any    ${out}    @{error_list}
 
 2.1 Watchdog manual reset
-    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
+    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     ${out}=    Telnet.Execute Command    ls /dev/watchdog
     Should Not Contain    ${out}    No such file or directory
-    Telnet.Write    echo 1 > /dev/watchdog
-    ${out}=    Telnet.Read Until   watchdog did not stop!
+    ${out}=    Telnet.Execute Command    echo 1 > /dev/watchdog
+    Should Not Contain    ${out}    /dev/watchdog: Device or resource busy
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
 
 2.2 Watchdog fork-bomb - fixed WDT
-    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
+    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     ${old_runtime}=    Get RuntimeWatchdogSec
     # start fork-bomb
     Telnet.Write    bomb() { bomb | bomb & }; bomb
@@ -47,7 +46,7 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
     Should Contain    ${out}    Starting kernel
 
 2.3 Watchdog fork-bomb - custom WDT
-    [Teardown]    Run Keyword If Timeout Occurred    Reboot and Reconnect
+    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     Run Keyword If    '${old_runtime}'!='${new_runtime}'    Set RuntimeWatchdogSec
     # reexecute daemon
     Telnet.Write    systemctl daemon-reexec
@@ -60,6 +59,7 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
 
 3.1 CBFStool validation
     ${result}=    Cbfstool Get Contents    ${cbfs_file}
+    Should Not Contain    ${result}    No such file or directory
     Should Not Contain    ${result}    Selected image region is not a valid CBFS.
     Log    ${result}
 
@@ -67,5 +67,6 @@ Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
     ${version}=    Ifdtool Get Version
     Log    ${version}
     ${descriptor}=    Ifdtool Dump Descriptor    ${ifd_file}
+    Should Not Contain    ${descriptor}    No such file or directory
     Should Not Contain    ${descriptor}    No Flash Descriptor found in this image
     Log    ${descriptor}

@@ -47,7 +47,7 @@ Soft Reboot DUT
 
 Reboot and Reconnect
     [Documentation]    Restarts DUT and set Telnet connection for next test.
-    ...                Use this keyword in test teardown if timeout occurs.
+    ...                Use this keyword in test teardown.
     Hard Reboot DUT
     Telnet.Login    ${dut_user}    ${dut_pwd}
 
