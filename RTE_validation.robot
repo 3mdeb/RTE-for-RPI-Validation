@@ -84,3 +84,15 @@ GPIO 4.2 Loopback validation RTE OUT / DUT IN
     \    @{gpio_values}=    GPIO Get All Values    DUT
     \    Collections.List Should Not Contain Value    ${gpio_values}    1
     \    ${index}=    Set Variable    ${index + 1}
+
+I2C 5.1 interface validation
+    ${busses}=    I2C Get Available Busses
+    :FOR    ${bus}    IN    @{busses}
+    \    ${result}=    I2C Get Device Addresses    ${bus}
+    \    ${string}=    String. Get Lines Containing String    ${result}    -- --
+    \    @{lines}=    String.Split To Lines    ${string}
+    \    ${addresses}=    I2C Parse Device Addresses    ${lines}
+    # BMA220 default address = 0a
+    Run Keyword If    ${addresses}
+    ...    Collections.List Should Contain Value    @{addresses}    0a
+    ...    ELSE    Fail    No I2C devices detected
