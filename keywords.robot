@@ -191,6 +191,10 @@ Rollback RuntimeWatchdogSec
     [Documentation]    Rollback the changes on the hardware watchdog's timeout.
     Telnet.Write    sed -i '/RuntimeWatchdogSec=${new_runtime}/c\RuntimeWatchdogSec=${old_runtime}' /etc/systemd/system.conf
 
+Start fork-bomb
+    [Documentation]   Start fork-bomb function on DUT platform.
+    Telnet.Write    bomb() { bomb | bomb & }; bomb
+
 Cbfstool Get Contents
     [Documentation]    Returns printed contents of the ROM specified by an
     ...                argument.
