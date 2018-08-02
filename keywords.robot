@@ -29,7 +29,7 @@ Serial Connection and Log In
     [Arguments]    ${host}
     Telnet.Open Connection    ${host}    port=${s2n_port}
     Telnet.Set Encoding    errors=ignore
-    Telnet.Set Timeout    120
+    Telnet.Set Timeout    180
     Telnet.Set Prompt    \~#
     Telnet.Write    \n
     Telnet.Login    ${dut_user}    ${dut_pwd}
