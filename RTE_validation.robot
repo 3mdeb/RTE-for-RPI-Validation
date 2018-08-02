@@ -24,6 +24,7 @@ SSH 1.1 Test SSH after coldboot
     \    SSHLibrary.Switch Connection    RTE
 
 SSH 1.2 Test SSH after warmboot
+    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
     \    Telnet.Login    ${dut_user}    ${dut_pwd}
@@ -74,7 +75,7 @@ GPIO 4.1 Loopback validation RTE IN / DUT OUT
 GPIO 4.2 Loopback validation RTE OUT / DUT IN
     GPIO Set All Directions    DUT    in
     GPIO Set All Directions    RTE    out
-    :FOR    ${index}    IN RANGE    0    1
+    :FOR    ${index}    IN RANGE    0    2
     \    GPIO Set All Values    RTE    1
     \    Sleep    1 seconds
     \    @{gpio_values}=    GPIO Get All Values    DUT
@@ -86,13 +87,14 @@ GPIO 4.2 Loopback validation RTE OUT / DUT IN
     \    ${index}=    Set Variable    ${index + 1}
 
 I2C 5.1 interface validation
+    ${addresses}=    Set Variable
     ${busses}=    I2C Get Available Busses
     :FOR    ${bus}    IN    @{busses}
     \    ${result}=    I2C Get Device Addresses    ${bus}
     \    ${string}=    String. Get Lines Containing String    ${result}    -- --
-    \    @{lines}=    String.Split To Lines    ${string}
+    \    ${lines}=    String.Split To Lines    ${string}
     \    ${addresses}=    I2C Parse Device Addresses    ${lines}
     # BMA220 default address = 0a
     Run Keyword If    ${addresses}
-    ...    Collections.List Should Contain Value    @{addresses}    0a
+    ...    Collections.List Should Contain Value    ${addresses}    0a
     ...    ELSE    Fail    No I2C devices detected
