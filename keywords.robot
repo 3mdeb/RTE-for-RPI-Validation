@@ -165,15 +165,21 @@ I2C Get Device Addresses
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
 
+Loop Through Match List
+    [Documentation]    Split string in list and append to main list.
+    [Arguments]    ${tmp_list}    ${list}
+    :FOR    ${tmp_item}    IN    @{tmp_list}
+    \    Collections.Append To List    ${list}    ${tmp_item}
+    [Return]    ${list}
+
 I2C Parse Device Addresses
     [Arguments]    ${items}
     ${list}=    Create List
     :FOR    ${item}    IN    @{items}
-    \    Log    ${item}
-    \    ${item}=    String.Get Substring    ${item}    3
-    \    ${match}=    String.Get Regexp Matches    ${item}    [0-9a-f][0-9a-f]
-    \    Run Keyword If    ${match}   Collections.Append To List    ${list}    ${match}
-    [Return]    @{list}
+    \    ${str}=    String.Get Substring    ${item}    3
+    \    ${match}=    String.Get Regexp Matches    ${str}    [0-9a-fU][0-9a-fU]
+    \    Run Keyword If    ${match}    Loop Through Match List    ${match}    ${list}
+    [Return]    ${list}
 
 Get RuntimeWatchdogSec
     [Documentation]    Get RuntimeWatchdogSec value from /etc/systemd/system.conf.
