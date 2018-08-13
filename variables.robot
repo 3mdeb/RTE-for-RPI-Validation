@@ -3,7 +3,8 @@
 ${USERNAME}        root
 ${PASSWORD}        meta-rte
 ${http_port}       8000
-${s2n_port}        13542
+${s2n_port1}       13541
+${s2n_port2}       13542
 ${dut_user}        root
 ${dut_pwd}         meta-rte
 
