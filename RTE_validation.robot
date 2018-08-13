@@ -4,6 +4,7 @@ Library     Telnet        timeout=30 seconds
 Library     RequestsLibrary
 Library     Collections
 Library     String
+Library     OperatingSystem
 
 Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
@@ -44,19 +45,12 @@ USB 2.2 USB port 2 (J8) validation
     Should Not Contain    ${result}    No such file or directory
     ${info}=    Get USB Device    ${usb2}
 
-RS232 3.1 communication to DUT validation
-    ${msg}=    Set Variable    Test #1 RS232
-    Telnet.Set Timeout    5 seconds
-    Start Listening On Serial Port    DUT    ${rs232}
-    Send Serial Msg    RTE    ${rs232}    ${msg}
-    ${result}=    Telnet.Read Until    ${msg}
-
-RS232 3.2 communication from DUT validation
-    ${msg}=    Set Variable    Test #2 RS232
-    Telnet.Set Timeout    5 seconds
-    Start Listening On Serial Port    RTE    ${rs232}
+RS232 3.1 Loopback validation
+    ${msg}=    Set Variable    Test RS232
+    Telnet.Set Timeout    10 seconds
     Send Serial Msg    DUT    ${rs232}    ${msg}
-    ${result}=    SSHLibrary.Read Until    ${msg}
+    Start Listening On Serial Port    DUT    ${rs232}
+    ${result}=    Telnet.Read Until    ${msg}
 
 GPIO 4.1 Loopback validation RTE IN / DUT OUT
     GPIO Set All Directions    RTE    in
@@ -98,3 +92,10 @@ I2C 5.1 interface validation
     Run Keyword If    ${addresses}
     ...    Collections.List Should Contain Value    ${addresses}    0a
     ...    ELSE    Fail    No I2C devices detected
+
+SPI 6.1 interface validation
+    ${version}=    String.Get Substring    ${fw_file}    5    -4
+    Rest API Setup    RteCtrlDUT    ${dut_ip}
+    SPI Flash Firmware    ${fw_file}
+    ${result}=    Get Sign of Life
+    Should Contain    ${result}    ${version}
