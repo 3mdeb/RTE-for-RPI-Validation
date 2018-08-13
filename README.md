@@ -27,26 +27,34 @@ Make sure that virtualvenv with robot framework is activated. General use:
 
 ### RTE Validation test suite
 
-#### Available test cases (`RTE_validation.robot`):
+#### Available test cases and required connections (`RTE_validation.robot`):
 * `-t SSH*` - SSH service validation after coldboot/warmboot,
 * `-t USB*` - USB port validation (plug 2 x USB storages into J6 and J8),
-* `-t RS232*` - RS232 communication test in both directions (connect both RTE
-  with NULL modem RS232 cable),
+* `-t RS232*` - RS232 loopback communication (connect pin2 (RX) with pin3 (TX)
+  on J14 DUT connector (DB9) via jumper wire),
 * `-t GPIO*` - GPIO loopback validation (connect 4 pins on J10 header to
   corresponding 4 GPIO pins on DUT J10 header),
 * `-t I2C*` - I2C interface validation (connect 4 pins on J9 header to
-  corresponding pins on BMA220 sensor).
+  corresponding pins on BMA220 sensor),
+* `-t SPI*` - SPI interface validation. To perform this test case connect one
+  APUx platform to DUT due to [this](https://gitlab.com/3mdeb/rte/docs/blob/master/docs/apus-connection-rte-0-5-3.md)
+  instruction, but use RS232 null modem cable to connect APUx with RTE (DUT DB9
+  port is needed for RS232 loopback validation).
+
+> Make sure that ECDSA key fingerprint for `dut_ip` is set, otherwise `fw_file`
+  won't be uploaded.
 
 To run `RTE_validation.robot` test suite it's required to set `rte_ip` ,`dut_ip`
-(ip address of RTE Under Test) and `repeat` (number of reboots, default=20)
-variables directly in command line, e.g.:
+(ip address of RTE Under Test), `repeat` (number of reboots, default=20),
+`platform` (PCEngines APUx, ex. apu4) and `fw_file` (coreboot ROM for APUx
+flashing) variables directly in command line, e.g.:
 
-`robot -L TRACE -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:50 RTE_validation.robot`
+`robot -L TRACE -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:50 -v platform:apu4 -v fw_file:apu4_v4.8.0.2.rom  RTE_validation.robot`
 
-To run specific tests from test suite type (e.g. interfaces validation without
-SSH service test cases):
+To run specific tests from test suite type (e.g. loopback RS232 and GPIO
+interfaces validation):
 
-`robot -L TRACE -v rte_ip:192.168.3.105 -t USB* -t RS232* -t GPIO* -t I2C* RTE_validation.robot`
+`robot -L TRACE -v rte_ip:192.168.3.105 -t RS232* -t GPIO* RTE_validation.robot`
 
 ### Yocto regression test suite
 
