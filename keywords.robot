@@ -21,13 +21,13 @@ SSH Connection and Log In
     SSHLibrary.Set Default Configuration    timeout=60 seconds
     SSHLibrary.Open Connection    ${ip}    alias=${alias}
     SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
-    REST API Setup    RteCtrl
+    REST API Setup    RteCtrl    ${rte_ip}
 
 Serial Connection and Log In
     [Documentation]    Setup telnet connection and log in to system. Pass host
     ...                ip as an argument.
     [Arguments]    ${host}
-    Telnet.Open Connection    ${host}    port=${s2n_port}
+    Telnet.Open Connection    ${host}    port=${s2n_port2}
     Telnet.Set Encoding    errors=ignore
     Telnet.Set Timeout    180
     Telnet.Set Prompt    \~#
@@ -81,7 +81,7 @@ Send Serial Msg
     [Arguments]    ${device}    ${port}    ${msg}
     Should Contain Any    ${device}    RTE    DUT
     Run Keyword If    '${device}'=='RTE'    SSHLibrary.Write    sleep 1 && echo -e "${msg}" > ${port}
-    ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    sleep 1 && echo -e "${msg}" > ${port}
+    ...    ELSE IF    '${device}'=='DUT'    Telnet.Write    sleep 1 && echo -e "${msg}" > ${port} &
     ...    ELSE    Fail    'device' argument should contain RTE or DUT
 
 GPIO Set Direction
@@ -173,6 +173,8 @@ Loop Through Match List
     [Return]    ${list}
 
 I2C Parse Device Addresses
+    [Documentation]    Parse available devices addresses from list passed as an
+    ...                argument. Returns list with parsed results.
     [Arguments]    ${items}
     ${list}=    Create List
     :FOR    ${item}    IN    @{items}
@@ -180,6 +182,50 @@ I2C Parse Device Addresses
     \    ${match}=    String.Get Regexp Matches    ${str}    [0-9a-fU][0-9a-fU]
     \    Run Keyword If    ${match}    Loop Through Match List    ${match}    ${list}
     [Return]    ${list}
+
+Get Sign of Life
+    [Documentation]    Return any sign of life after flashing firmware.
+    Telnet.Open Connection    ${rte_ip}    port=${s2n_port1}
+    Telnet.Set Encoding    errors=ignore
+    Telnet.Set Timeout    120s
+    RteCtrlDUT Power Off
+    Sleep    1s
+    # read the old output
+    Telnet.Read
+    RteCtrlDUT Power On
+    ${sign_of_life}=    Telnet.Read Until    DRAM
+    Telnet.Close Connection
+    Telnet.Switch Connection    1
+    [Return]    ${sign_of_life}
+
+Flash apu2
+    [Documentation]    Flashes apu2/3/4/5 platform with flashrom.
+    RteCtrlDUT Power Off
+    ${flash_result}=    Telnet.Execute Command    flashrom -f -p linux_spi:dev=/dev/spidev1.0,spispeed=16000 -w /tmp/coreboot.rom
+    Return From Keyword If    "Warning: Chip content is identical to the requested image." in """${flash_result}"""
+    Should Contain    ${flash_result}     VERIFIED
+
+Flash apu1
+    [Documentation]    Flashes apu1 platform with flashrom.
+    RteCtrlDUT Power Off
+    ${flash_result}=    Telnet.Execute Command    flashrom -f -c MX25L1605A/MX25L1606E/MX25L1608E -p linux_spi:dev=/dev/spidev1.0,spispeed=16000 -w /tmp/coreboot.rom
+    Return From Keyword If    "Warning: Chip content is identical to the requested image." in """${flash_result}"""
+    Should Contain    ${flash_result}     VERIFIED
+
+SPI Flash Firmware
+    [Documentation]    Flash APUx firmware connected to DUT via SPI.
+    [Arguments]    ${file}
+    ${result}=    RteCtrlDUT Relay
+    Sleep    1s
+    Run Keyword If   ${result}==0  RteCtrlDUT Relay
+    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:/tmp/coreboot.rom
+    Should Be Empty    ${result}
+    Run Keyword If    '${platform}' == 'apu1'    Flash apu1
+    ...    ELSE IF    '${platform}' == 'apu2'    Flash apu2
+    ...    ELSE IF    '${platform}' == 'apu3'    Flash apu2
+    ...    ELSE IF    '${platform}' == 'apu4'    Flash apu2
+    ...    ELSE IF    '${platform}' == 'apu5'    Flash apu2
+    ...    ELSE    Log    ERROR    Unknown platform ${platform}
 
 Get RuntimeWatchdogSec
     [Documentation]    Get RuntimeWatchdogSec value from /etc/systemd/system.conf.
