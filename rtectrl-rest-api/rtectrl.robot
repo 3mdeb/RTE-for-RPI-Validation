@@ -46,5 +46,24 @@ RteCtrl Set GPIO
     Should Be Equal As Integers    ${response.status_code}    200
 
 REST API Setup
-    [Arguments]    ${session_handler}
-    RequestsLibrary.Create Session    ${session_handler}    http://${rte_ip}:${http_port}    verify=True
+    [Arguments]    ${session_handler}    ${ip}
+    RequestsLibrary.Create Session    ${session_handler}    http://${ip}:${http_port}    verify=True
+
+RteCtrlDUT Relay
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${relay}=    Get Request     RteCtrlDUT     /api/v1/gpio/0    ${headers}
+    ${state}=    Evaluate    int((${relay.json()["state"]}+1)%2)
+    ${message}=    Create Dictionary     state=${state}    direction=out    time=${0}
+    ${relay}=    Patch Request    RteCtrlDUT    /api/v1/gpio/0    ${message}    headers=${headers}
+    [Return]    ${state}
+
+RteCtrlDUT Power On
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${message}=    Create Dictionary     state=${1}    direction=out    time=${1}
+    ${power}=    Patch Request    RteCtrlDUT    /api/v1/gpio/9    ${message}    headers=${headers}
+
+RteCtrlDUT Power Off
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${message}=    Create Dictionary     state=${1}    direction=out    time=${5}
+    ${power}=    Patch Request    RteCtrlDUT    /api/v1/gpio/9    ${message}    headers=${headers}
+    Sleep    5s
