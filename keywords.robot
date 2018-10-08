@@ -218,7 +218,7 @@ SPI Flash Firmware
     ${result}=    RteCtrlDUT Relay
     Sleep    1s
     Run Keyword If   ${result}==0  RteCtrlDUT Relay
-    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:/tmp/coreboot.rom
+    ${result}=    SSHLibrary.Put File    ${file}    destination=/tmp/coreboot.rom
     Should Be Empty    ${result}
     Run Keyword If    '${platform}' == 'apu1'    Flash apu1
     ...    ELSE IF    '${platform}' == 'apu2'    Flash apu2
@@ -251,8 +251,7 @@ Cbfstool Get Contents
     [Documentation]    Returns printed contents of the ROM specified by an
     ...                argument.
     [Arguments]    ${file}
-    #TODO: SSHLibrary.Put File    ${file}    ${fw_path}
-    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:${fw_path}
+    ${result}=    SSHLibrary.Put File    ${file}    destination=${fw_path}
     Should Be Empty    ${result}
     Telnet.Write Bare    cbfstool ${fw_path} print\n
     ${out}=    Telnet.Read Until Prompt
@@ -268,8 +267,7 @@ Ifdtool Dump Descriptor
     [Documentation]    Returns dumped Intel firmware descriptor. Pass rom file
     ...                path as an argument.
     [Arguments]    ${file}
-    #TODO: SSHLibrary.Put File    ${file}    ${fw_path}
-    ${result}=    Run    sshpass -p ${dut_pwd} scp ${file} ${dut_user}@${dut_ip}:${fw_path}
+    ${result}=    SSHLibrary.Put File    ${file}    destination=${fw_path}
     Should Be Empty    ${result}
     Telnet.Write Bare    ifdtool -d ${fw_path}\n
     ${out}=    Telnet.Read Until Prompt
