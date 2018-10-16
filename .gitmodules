@@ -1,0 +1,4 @@
+
+[submodule "rtectrl-rest-api"]
+	path = rtectrl-rest-api
+	url = git@gitlab.com:3mdeb/rte/rtectrl-rest-api.git
