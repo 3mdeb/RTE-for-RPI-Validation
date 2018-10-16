@@ -9,59 +9,56 @@ Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
 Resource    keywords.robot
 
-Suite Setup       Open Connection and Log In    ${rte_ip}    RTE
-Suite Teardown    Run Keywords    Rollback RuntimeWatchdogSec
-                  ...             Log Out And Close Connection
+Suite Setup       Prepare Test Suite
+Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
-1.1 Coldboot validation
+BOT1.1 Coldboot validation
+    [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
+    ...           5x    1s    Reboot and Reconnect
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Hard Reboot DUT
     \    ${out}=    Telnet.Read Until    login:
     \    Run Keyword And Continue On Failure    Should Not Contain Any    ${out}    @{error_list}
 
-1.2 Warmboot validation
-    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
+BOT1.2 Warmboot validation
+    [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
+    ...           5x    1s    Reboot and Reconnect
     : FOR    ${reboot}    IN RANGE    0    ${repeat}
     \    Soft Reboot DUT
     \    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     \    Run Keyword And Continue On Failure    Should Not Contain Any    ${out}    @{error_list}
 
-2.1 Watchdog manual reset
-    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
-    ${out}=    Telnet.Execute Command    ls /dev/watchdog
+WDT2.1 Watchdog manual reset
+    [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
+    ...           5x    1s    Reboot and Reconnect
+    Telnet.Write Bare   ls /dev/watchdog\n
+    ${out}=    Telnet.Read Until Prompt
     Should Not Contain    ${out}    No such file or directory
-    ${out}=    Telnet.Execute Command    echo 1 > /dev/watchdog
+    Set RuntimeWatchdogSec    ${old_runtime}    0
+    Telnet.Write Bare   echo 1 > /dev/watchdog\n
+    ${out}=    Telnet.Read Until Prompt
     Should Not Contain    ${out}    /dev/watchdog: Device or resource busy
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
 
-2.2 Watchdog fork-bomb - fixed WDT
-    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
-    ${old_runtime}=    Get RuntimeWatchdogSec
+WDT2.2 Watchdog fork-bomb - fixed WDT
+    [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
+    ...           5x    1s    Reboot and Reconnect
+    ${old_value}=    Get RuntimeWatchdogSec
+    Set RuntimeWatchdogSec    ${old_value}    ${old_runtime}
     Start fork-bomb
     # test if WDT performed reboot:
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
 
-2.3 Watchdog fork-bomb - custom WDT
-    [Teardown]    Run Keyword If Test Failed    Reboot and Reconnect
-    Run Keyword If    '${old_runtime}'!='${new_runtime}'    Set RuntimeWatchdogSec
-    # reexecute daemon
-    Telnet.Write    systemctl daemon-reexec
-    Telnet.Read Until Prompt
-    Start fork-bomb
-    # test if WDT performed reboot:
-    ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
-    Should Contain    ${out}    Starting kernel
-
-3.1 CBFStool validation
+TOL3.1 CBFStool validation
     ${result}=    Cbfstool Get Contents    ${cbfs_file}
     Should Not Contain    ${result}    No such file or directory
     Should Not Contain    ${result}    Selected image region is not a valid CBFS.
     Log    ${result}
 
-3.2 IFDtool validation
+TOL3.2 IFDtool validation
     ${version}=    Ifdtool Get Version
     Log    ${version}
     ${descriptor}=    Ifdtool Dump Descriptor    ${ifd_file}
