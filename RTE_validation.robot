@@ -10,7 +10,7 @@ Resource    rtectrl-rest-api/rtectrl.robot
 Resource    variables.robot
 Resource    keywords.robot
 
-Suite Setup       Open Connection and Log In    ${rte_ip}    RTE
+Suite Setup       Prepare Test Suite
 Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
@@ -95,7 +95,7 @@ I2C 5.1 interface validation
 
 SPI 6.1 interface validation
     ${version}=    String.Get Substring    ${fw_file}    5    -4
-    Rest API Setup    RteCtrlDUT    ${dut_ip}
+    keywords.REST API Setup    RteCtrlDUT    ${dut_ip}
     SPI Flash Firmware    ${fw_file}
     ${result}=    Get Sign of Life
     Should Contain    ${result}    ${version}

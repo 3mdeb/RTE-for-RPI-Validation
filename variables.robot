@@ -27,8 +27,7 @@ ${gpio4}           gpio403
 
 # Yocto regression
 ${fw_path}        /tmp/firmware
-${new_runtime}     5
-${old_runtime}     0
+${old_runtime}     15
 ${err1}            Kernel panic
 ${err2}            Sending NMI from CPU
 ${err3}            Unable to handle kernel NULL pointer dereference

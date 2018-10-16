@@ -5,8 +5,9 @@ Open Connection and Log In
     ...                in to system.
     [Arguments]    ${ip}    ${alias}
     SSH Connection and Log In    ${ip}    ${alias}
-    ${state}=    SSHLibrary.Execute Command    cat /sys/class/gpio/gpio199/value
-    Run Keyword If   '${state}'=='0'    RteCtrl Relay
+    ${result}=    Get Relay State
+    Run Keyword If    '${result}'=='0'    RteCtrl Relay
+    Sleep    1s
     Serial Connection and Log In    ${ip}
 
 Log Out And Close Connection
@@ -21,7 +22,7 @@ SSH Connection and Log In
     SSHLibrary.Set Default Configuration    timeout=60 seconds
     SSHLibrary.Open Connection    ${ip}    alias=${alias}
     SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
-    REST API Setup    RteCtrl    ${rte_ip}
+    keywords.REST API Setup    RteCtrl    ${rte_ip}
 
 Serial Connection and Log In
     [Documentation]    Setup telnet connection and log in to system. Pass host
@@ -29,10 +30,40 @@ Serial Connection and Log In
     [Arguments]    ${host}
     Telnet.Open Connection    ${host}    port=${s2n_port2}
     Telnet.Set Encoding    errors=ignore
-    Telnet.Set Timeout    180
+    Telnet.Set Timeout    300
     Telnet.Set Prompt    \~#
     Telnet.Write    \n
     Telnet.Login    ${dut_user}    ${dut_pwd}
+
+Prepare Test Suite
+    [Documentation]    Opens all required connections on RTE and sets DUT to
+    ...                unified start state.
+    Open Connection and Log In    ${rte_ip}    RTE
+    Telnet.Read
+    ${old_runtime}=    Get RuntimeWatchdogSec
+
+REST API Setup
+    [Arguments]    ${session_handler}    ${ip}
+    RequestsLibrary.Create Session    ${session_handler}    http://${ip}:${http_port}    verify=True
+
+RteCtrlDUT Relay
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${relay}=    Get Request     RteCtrlDUT     /api/v1/gpio/0    ${headers}
+    ${state}=    Evaluate    int((${relay.json()["state"]}+1)%2)
+    ${message}=    Create Dictionary     state=${state}    direction=out    time=${0}
+    ${relay}=    Patch Request    RteCtrlDUT    /api/v1/gpio/0    ${message}    headers=${headers}
+    [Return]    ${state}
+
+RteCtrlDUT Power On
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${message}=    Create Dictionary     state=${1}    direction=out    time=${1}
+    ${power}=    Patch Request    RteCtrlDUT    /api/v1/gpio/9    ${message}    headers=${headers}
+
+RteCtrlDUT Power Off
+    ${headers}=    Create Dictionary    Content-Type=application/json    Accept=application/json
+    ${message}=    Create Dictionary     state=${1}    direction=out    time=${5}
+    ${power}=    Patch Request    RteCtrlDUT    /api/v1/gpio/9    ${message}    headers=${headers}
+    Sleep    5s
 
 Hard Reboot DUT
     [Documentation]    Hard reboot Device Under Test.
@@ -42,7 +73,7 @@ Hard Reboot DUT
 
 Soft Reboot DUT
     [Documentation]    Soft reboot Device Under Test.
-    Telnet.Write   reboot\n
+    Telnet.Write Bare   reboot\n
     #Telnet.Close Connection
 
 Reboot and Reconnect
@@ -219,7 +250,6 @@ SPI Flash Firmware
     Sleep    1s
     Run Keyword If   ${result}==0  RteCtrlDUT Relay
     ${result}=    SSHLibrary.Put File    ${file}    destination=/tmp/coreboot.rom
-    Should Be Empty    ${result}
     Run Keyword If    '${platform}' == 'apu1'    Flash apu1
     ...    ELSE IF    '${platform}' == 'apu2'    Flash apu2
     ...    ELSE IF    '${platform}' == 'apu3'    Flash apu2
@@ -229,30 +259,49 @@ SPI Flash Firmware
 
 Get RuntimeWatchdogSec
     [Documentation]    Get RuntimeWatchdogSec value from /etc/systemd/system.conf.
-    ${tmp}=    Telnet.Execute Command    cat /etc/systemd/system.conf | grep RuntimeWatchdog
-    ${tmp}=    String.Remove String    ${tmp}     RuntimeWatchdogSec=    \r\nroot@orange-pi-zero:~#
-    ${out}=    Run Keyword If    '${tmp[0]}'=='#'    String.Get Substring    ${tmp}    1
-    ...        ELSE    Set Variable    ${tmp}
+    Telnet.Write Bare    cat /etc/systemd/system.conf | grep RuntimeWatchdog\n
+    ${lines}=    Telnet.Read Until Prompt
+    ${line}=    Get Lines Containing String    ${lines}    RuntimeWatchdogSec=
+    ${value}=    String.Remove String    ${line}     RuntimeWatchdogSec=    \r\nroot@orange-pi-zero:~#
+    ${out}=    Run Keyword If    '${value[0]}'=='#'    String.Get Substring    ${value}    1
+    ...        ELSE    Set Variable    ${value}
     [Return]    ${out}
 
 Set RuntimeWatchdogSec
     [Documentation]    Configure the hardware watchdog's timeout for tests.
-    Telnet.Write    sed -i '/RuntimeWatchdogSec=${old_runtime}/c\RuntimeWatchdogSec=${new_runtime}' /etc/systemd/system.conf
+    [Arguments]    ${old_value}    ${new_value}
+    Return From Keyword If    '${old_value}'=='${new_value}'
+    Telnet.Write Bare    sed -i '/RuntimeWatchdogSec=${old_value}/c\RuntimeWatchdogSec=${new_value}' /etc/systemd/system.conf\n
+    Telnet.Read Until Prompt
+    # reexecute daemon
+    Telnet.Write Bare    systemctl daemon-reexec\n
+    ${result}=    Telnet.Read Until Prompt
+    ${tmp}=    Get RuntimeWatchdogSec
+    Should Be Equal    ${tmp}    ${new_value}
 
 Rollback RuntimeWatchdogSec
     [Documentation]    Rollback the changes on the hardware watchdog's timeout.
-    Telnet.Write    sed -i '/RuntimeWatchdogSec=${new_runtime}/c\RuntimeWatchdogSec=${old_runtime}' /etc/systemd/system.conf
+    Telnet.Write Bare    sed -i '/RuntimeWatchdogSec=${new_runtime}/c\RuntimeWatchdogSec=${old_runtime}' /etc/systemd/system.conf\n
+    # reexecute daemon
+    Telnet.Write Bare    systemctl daemon-reexec\n
+    ${result}=    Telnet.Read Until Prompt
+    ${tmp}=    Get RuntimeWatchdogSec
+    Should Be Equal    ${tmp}    ${old_runtime}
 
 Start fork-bomb
     [Documentation]   Start fork-bomb function on DUT platform.
-    Telnet.Write    bomb() { bomb | bomb & }; bomb
+    Telnet.Write Bare    bomb() { bomb | bomb & }; bomb\n
 
 Cbfstool Get Contents
     [Documentation]    Returns printed contents of the ROM specified by an
     ...                argument.
     [Arguments]    ${file}
+    SSHLibrary.Open Connection    ${dut_ip}    DUT
+    SSHLibrary.Switch Connection    DUT
+    SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
     ${result}=    SSHLibrary.Put File    ${file}    destination=${fw_path}
-    Should Be Empty    ${result}
+    SSHLibrary.Close Connection
+    SSHLibrary.Switch Connection    RTE
     Telnet.Write Bare    cbfstool ${fw_path} print\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
@@ -267,8 +316,12 @@ Ifdtool Dump Descriptor
     [Documentation]    Returns dumped Intel firmware descriptor. Pass rom file
     ...                path as an argument.
     [Arguments]    ${file}
+    SSHLibrary.Open Connection    ${dut_ip}    DUT
+    SSHLibrary.Switch Connection    DUT
+    SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
     ${result}=    SSHLibrary.Put File    ${file}    destination=${fw_path}
-    Should Be Empty    ${result}
+    SSHLibrary.Close Connection
+    SSHLibrary.Switch Connection    RTE
     Telnet.Write Bare    ifdtool -d ${fw_path}\n
     ${out}=    Telnet.Read Until Prompt
     [Return]    ${out}
