@@ -59,10 +59,10 @@ interfaces validation):
 ### Yocto regression test suite
 
 #### Available test cases (`regression_tests.robot`):
-* `-t 1*` - system boot validation after coldboot (1.1) and warmboot (1.2),  
-* `-t 2*` - watchdog validation: manual reset via watchdog (2.1) and fork-bomb
-  test for WDT (2.2 and 2.3),
-* `-t 3*` - CBFStool (3.1) and IFDtool (3.2) test cases.
+* `-t BOT*` - system boot validation after coldboot (1.1) and warmboot (1.2),  
+* `-t WDT*` - watchdog validation: manual reset via watchdog (2.1) and fork-bomb
+  test for WDT (2.2),
+* `-t TOL*` - CBFStool (3.1) and IFDtool (3.2) test cases.
 
 To run `regression_tests.robot` test suite it's required to set `rte_ip`,
 `dut_ip` (ip address of RTE Under Test), `repeat` (number of reboots,
