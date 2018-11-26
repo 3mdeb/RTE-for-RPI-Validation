@@ -292,6 +292,10 @@ Start fork-bomb
     [Documentation]   Start fork-bomb function on DUT platform.
     Telnet.Write Bare    bomb() { bomb | bomb & }; bomb\n
 
+Crash kernel
+    [Documentation]    Crash kernel on DUT via SysRq key.
+    Telnet.Write Bare    sync; sleep 2; sync; echo c > /proc/sysrq-trigger\n
+
 Cbfstool Get Contents
     [Documentation]    Returns printed contents of the ROM specified by an
     ...                argument.
