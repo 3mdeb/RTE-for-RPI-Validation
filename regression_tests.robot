@@ -37,17 +37,19 @@ WDT2.1 Watchdog manual reset
     Should Not Contain    ${out}    No such file or directory
     Set RuntimeWatchdogSec    ${old_runtime}    0
     Telnet.Write Bare   echo 1 > /dev/watchdog\n
+    Telnet.Set Timeout    60 seconds
     ${out}=    Telnet.Read Until Prompt
     Should Not Contain    ${out}    /dev/watchdog: Device or resource busy
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
 
-WDT2.2 Watchdog fork-bomb - fixed WDT
+WDT2.2 Watchdog sysrq trigger - fixed WDT
     [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
     ...           5x    1s    Reboot and Reconnect
     ${old_value}=    Get RuntimeWatchdogSec
     Set RuntimeWatchdogSec    ${old_value}    ${old_runtime}
-    Start fork-bomb
+    Crash kernel
+    Telnet.Set Timeout    60 seconds
     # test if WDT performed reboot:
     ${out}=    Telnet.Login    ${dut_user}    ${dut_pwd}
     Should Contain    ${out}    Starting kernel
