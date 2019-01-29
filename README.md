@@ -7,8 +7,8 @@ framework.
 #### Virtualenv initialization and dependencies installation
 
 ```
-git clone git@gitlab.com:3mdeb/rte/
-cd
+git clone git@gitlab.com:3mdeb/rte/validation
+cd validation
 git submodule update --init --checkout
 virtualenv -p $(which python2) robot-venv
 source robot-venv/bin/activate
