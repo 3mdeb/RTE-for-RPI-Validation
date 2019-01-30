@@ -13,6 +13,30 @@ Suite Setup       Prepare Test Suite
 Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
+SWU1.0 Rte sw-update
+    ${mounted_from}=    SSHLibrary.Execute Command    mount
+    ${get_p_number}=    Get Line    ${mounted_from}    0
+    ${get_p_number_split}=    Split String To Characters    ${get_p_number}
+    ${get_p_number_split}=    Set Variable    ${get_p_number_split[13]}
+    ${p2}=    Evaluate    '${get_p_number_split}'=='2'
+    ${p3}=    Evaluate    '${get_p_number_split}'=='3'
+    ${p_number}=    Set Variable If
+    ...    ${p2}    2
+    ...    ${p3}    3
+    ${image}=    Set Variable    /home/mszelecka/Desktop/validation/core-image-minimal-orange-pi-zero-v0.6.1.swu
+    Telnet.Execute Command    scp ${image} root@${rte_ip}:/storage
+    Telnet.Read Until    Restarting system
+    SSHLibrary. Execute Command    journalctl -fu confirm-upgrade
+    SSHLibrary.Read Until    Started confirm upgraded software
+    : FOR    ${INDEX}    IN RANGE    0    3
+    \    ${mounted_from}=    SSHLibrary.Execute Command    mount
+    \    ${get_p_number}=    Get Line    ${mounted_from}    0
+    \    ${get_p_number_split}=    Split String To Characters    ${get_p_number}
+    \    Run keyword if    '${p_number}'=='2'
+    \    ...    Should Be Equal    ${get_p_number_split[13]}    3
+    \    ...    ELSE    Should Be Equal    ${get_p_number_split[13]}    2
+    \    Telnet.Write Bare    reboot\n
+
 BOT1.1 Coldboot validation
     [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
     ...           5x    1s    Reboot and Reconnect
