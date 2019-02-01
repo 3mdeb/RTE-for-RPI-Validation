@@ -70,7 +70,7 @@ default=20), `cbfs_file` (path to file for CBFStool test) and `ifd_file` (path
 to file for IFDtool test) variables directly in command line, e.g.:
 
 ```
-robot -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:20 -v cbfs_file:apu2_v4.8.0.2.rom -v ifd_file:libretrend_firmware.bin -v swu_image:<path_to_file> regression_tests.robot
+robot -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:20 -v cbfs_file:apu2_v4.8.0.2.rom -v ifd_file:libretrend_firmware.bin -v sw_image:<path_to_file> regression_tests.robot
 ```
 > Make sure that ECDSA key fingerprint for `dut_ip` is set, otherwise `cbfs_file`
 or `ifd_file` won't be uploaded.

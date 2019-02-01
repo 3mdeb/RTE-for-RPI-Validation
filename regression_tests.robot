@@ -80,10 +80,13 @@ SWU1.0 Rte sw-update
     SSHLibrary.Open Connection    ${dut_ip}    DUT
     SSHLibrary.Switch Connection    DUT
     SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
-    SSHLibrary.Put File    ${sw_image}    root@${rte_ip}:/tmp/image.swu
+    SSHLibrary.Put File    ${sw_image}    root@${dut_ip}:/tmp/image.swu
     SSHLibrary.Close Connection
-    SSHLibrary.Execute Command    rte-upgrade upgrade /tmp/image.swu
-    SSHLibrary.Write    journalctl -fu confirm-upgrade
+    Telnet.Execute Command    rte-upgrade upgrade /tmp/image.swu
+    Telnet. Read
+    ${journal}=    Telnet.Execute Command    journalctl -fu confirm-upgrade &
+    Should Contain    ${journal}    SWUPDATE successful
+    Telnet.Write    killall -9 journalctl
     : FOR    ${INDEX}    IN RANGE    0    3
     \    ${mounted_from}=    Telnet.Execute Command    mount
     \    ${get_p_number}=    Get Line    ${mounted_from}    0
