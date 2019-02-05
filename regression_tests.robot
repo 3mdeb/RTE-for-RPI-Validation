@@ -72,19 +72,23 @@ TOL3.2 IFDtool validation
 SWU1.0 Rte sw-update
     ${mounted_from}=    Telnet.Execute Command    mount
     ${line_p_number}=    Get Line    ${mounted_from}    0
-    ${p_number}=    Set Variable    ${line_p_number[13]}
+    ${p_number}=    Set Suite Variable    ${line_p_number[13]}
     SSHLibrary.Open Connection    ${dut_ip}    DUT
     SSHLibrary.Switch Connection    DUT
     SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
     SSHLibrary.Put File    ${sw_image}    root@${dut_ip}:/tmp/image.swu
     SSHLibrary.Close Connection
     Telnet.Execute Command    rte-upgrade upgrade /tmp/image.swu
-    Telnet.Login    ${dut_user}    ${dut_pwd}
-    ${journal}=    Telnet.Execute Command    journalctl -fu confirm-upgrade &
+    ${journal}=    Telnet.Read Until    SWUPDATE successful
     Should Contain    ${journal}    SWUPDATE successful
-    Telnet.Execute Command    killall -9 journalctl
+
+SWU1.1 Check if version stays the same after reboots [WIP] 
+    #Telnet. Read Until    missed due to ratelimiting
+    #Telnet. Write Bare    \n
     : FOR    ${INDEX}    IN RANGE    0    3
-    \    ${mounted_from}=    Telnet.Execute Command    mount
+    \    Telnet.Login    ${dut_user}    ${dut_pwd}
+    \    Telnet.Execute Command    mount
+    \    ${mounted_from}=    Telnet.Read Until    (rw,relatime)
     \    ${line_p_number}=    Get Line    ${mounted_from}    0
     \    Run keyword if    '${p_number}'=='2'
     \    ...    Should Be Equal    ${line_p_number[13]}    3
