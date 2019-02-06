@@ -83,7 +83,7 @@ SWU1.0 Rte sw-update
     ${journal}=    Telnet.Read Until    SWUPDATE successful
     Should Contain    ${journal}    SWUPDATE successful
 
-SWU1.1 Check if version stays the same after reboots [WIP]
+SWU1.1 Check if version stays the same after reboots
     : FOR    ${INDEX}    IN RANGE    0    3
     \    Telnet.Login    ${dut_user}    ${dut_pwd}
     \    ${mounted_from}=    Telnet.Execute Command    mount
