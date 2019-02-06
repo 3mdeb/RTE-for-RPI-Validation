@@ -63,6 +63,8 @@ interfaces validation):
 * `-t WDT*` - watchdog validation: manual reset via watchdog (2.1) and fork-bomb
   test for WDT (2.2),
 * `-t TOL*` - CBFStool (3.1) and IFDtool (3.2) test cases.
+* `-t SWU*` - Rte sw-update (1.0) and Check if version stays the same after
+  reboots (1.1)
 
 To run `regression_tests.robot` test suite it's required to set `rte_ip`,
 `dut_ip` (ip address of RTE Under Test), `repeat` (number of reboots,
