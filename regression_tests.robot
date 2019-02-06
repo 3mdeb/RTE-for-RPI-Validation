@@ -13,6 +13,7 @@ Suite Setup       Prepare Test Suite
 Suite Teardown    Log Out And Close Connection
 
 *** Test Cases ***
+
 BOT1.1 Coldboot validation
     [Teardown]    Run Keyword If Test Failed    Wait Until Keyword Succeeds
     ...           5x    1s    Reboot and Reconnect
@@ -67,3 +68,27 @@ TOL3.2 IFDtool validation
     Should Not Contain    ${descriptor}    No such file or directory
     Should Not Contain    ${descriptor}    No Flash Descriptor found in this image
     Log    ${descriptor}
+
+SWU1.0 Rte sw-update
+    ${mounted_from}=    Telnet.Execute Command    mount
+    ${line_p_number}=    Get Line    ${mounted_from}    0
+    ${p_number}=    Set Variable    ${line_p_number[13]}
+    Set Suite Variable    ${p_number}
+    SSHLibrary.Open Connection    ${dut_ip}    DUT
+    SSHLibrary.Switch Connection    DUT
+    SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
+    SSHLibrary.Put File    ${sw_image}    ${dut_user}@${dut_ip}:/tmp/image.swu
+    SSHLibrary.Close Connection
+    Telnet.Execute Command    rte-upgrade upgrade /tmp/image.swu
+    ${journal}=    Telnet.Read Until    SWUPDATE successful
+    Should Contain    ${journal}    SWUPDATE successful
+
+SWU1.1 Check if version stays the same after reboots
+    : FOR    ${INDEX}    IN RANGE    0    3
+    \    Telnet.Login    ${dut_user}    ${dut_pwd}
+    \    ${mounted_from}=    Telnet.Execute Command    mount
+    \    ${line_p_number}=    Get Line    ${mounted_from}    0
+    \    Run keyword if    '${p_number}'=='2'
+    \    ...    Should Be Equal    ${line_p_number[13]}    3
+    \    ...    ELSE    Should Be Equal    ${line_p_number[13]}    2
+    \    Telnet.Write    reboot

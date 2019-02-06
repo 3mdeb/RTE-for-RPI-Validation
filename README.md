@@ -12,7 +12,7 @@ cd validation
 git submodule update --init --checkout
 virtualenv -p $(which python2) robot-venv
 source robot-venv/bin/activate
-./install_libs.sh
+pip install -r requirements.txt
 ```
 
 #### Virtualvenv deactivation
@@ -63,6 +63,8 @@ interfaces validation):
 * `-t WDT*` - watchdog validation: manual reset via watchdog (2.1) and fork-bomb
   test for WDT (2.2),
 * `-t TOL*` - CBFStool (3.1) and IFDtool (3.2) test cases.
+* `-t SWU*` - Rte sw-update (1.0) and Check if version stays the same after
+  reboots (1.1)
 
 To run `regression_tests.robot` test suite it's required to set `rte_ip`,
 `dut_ip` (ip address of RTE Under Test), `repeat` (number of reboots,
@@ -70,7 +72,7 @@ default=20), `cbfs_file` (path to file for CBFStool test) and `ifd_file` (path
 to file for IFDtool test) variables directly in command line, e.g.:
 
 ```
-robot -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:20 -v cbfs_file:apu2_v4.8.0.2.rom -v ifd_file:libretrend_firmware.bin regression_tests.robot
+robot -v rte_ip:192.168.3.105 -v dut_ip:192.168.3.107 -v repeat:20 -v cbfs_file:apu2_v4.8.0.2.rom -v ifd_file:libretrend_firmware.bin -v sw_image:<path_to_file> regression_tests.robot
 ```
 > Make sure that ECDSA key fingerprint for `dut_ip` is set, otherwise `cbfs_file`
 or `ifd_file` won't be uploaded.
