@@ -77,7 +77,7 @@ SWU1.0 Rte sw-update
     SSHLibrary.Open Connection    ${dut_ip}    DUT
     SSHLibrary.Switch Connection    DUT
     SSHLibrary.Login    ${USERNAME}    ${PASSWORD}
-    SSHLibrary.Put File    ${sw_image}    root@${dut_ip}:/tmp/image.swu
+    SSHLibrary.Put File    ${sw_image}    ${dut_user}@${dut_ip}:/tmp/image.swu
     SSHLibrary.Close Connection
     Telnet.Execute Command    rte-upgrade upgrade /tmp/image.swu
     ${journal}=    Telnet.Read Until    SWUPDATE successful
